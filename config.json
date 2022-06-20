@@ -1,9 +1,9 @@
 {
-   "token": "OTg4NDIxOTY5ODc3ODE1MzE2.Gg_h7Y.qKsMqmZ98XpBSV1bvkJoOqlEXyU9tFw3CVUKjU",
+   "token": "",
    "guildId": "882256630002090024",
    "clientId": "988421969877815316",
    "roleSupport": "882256630211825736" ,
-   "serverColorMain": "#001aff",
+   "serverColorMain": "#0362fc",
 
    "category": "882286180064964709",
 
@@ -11,7 +11,8 @@
    "errorLog": "988437504254423080",
    "ticketLog": "882256631193292822",
 
-   "sayMinLength": "5",
+   "assistenzaMinLength": "5",
+   "assistenza": "988504025148313660",
 
    "BadWords":[
       "porco dio",
