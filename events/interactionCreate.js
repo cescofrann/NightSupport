@@ -1,178 +1,106 @@
-const { MessageActionRow, Modal, TextInputComponent } = require('discord.js');
-const translate = require('@iamtraction/google-translate');
+const {
+	MessageActionRow,
+	Modal,
+	TextInputComponent
+} = require('discord.js');
+
 module.exports = {
-  name: 'interactionCreate',
-  async execute(interaction, client) {
-    // ---------- VERIFICA ---------
+	name: 'interactionCreate',
+	async execute(interaction, client) {
 
-    if (interaction.customId == "verifica") {
-      if(interaction.member.roles.cache.has(config.verifyRole)){
-        
-        return (
-          interaction.reply({content:'Hai già superato la verifica.', ephemeral:true }))
-        
-      }else{
-        return(
-          interaction.member.roles.add(config.verifyRole),
-          interaction.reply({
-            content: 'Benvenuto nel server ! Ti sei appena verificato. Fatti un giro, se hai qualche dubbio scrivi pure in un ticket il tuo problema.',
-            ephemeral: true
-        })
-        )
-      
-      }
-    } 
+		// ----------- COMANDI -----------
+
+		if (interaction.commandName === 'assistenza') {
+
+			// Create the modal
+			const modal = new Modal()
+				.setCustomId('assistenzaModal')
+				.setTitle('Richiesta Assistenza');
 
 
-    // ----------- COMANDI -----------
-    
-    if (interaction.commandName === 'assistenza') {
+			const message = new TextInputComponent()
+				.setCustomId('assistenzaMessage')
+				.setLabel("Descrivi qui in breve il tuo problema")
+				.setStyle('PARAGRAPH')
+				.setMinLength(config.assistenzaMinLength)
+				.setPlaceholder('Bot Developed by Cescofran for DotBund')
+				.setRequired(true);
 
-      // Create the modal
-      const modal = new Modal()
-        .setCustomId('assistenzaModal')
-        .setTitle('assistenza command by DotBund Development');
+			const Nick = new TextInputComponent()
+				.setCustomId('assistenzaNick')
+				.setLabel('Nickname')
+				.setPlaceholder("Inserisci qui il tuo nickname in game")
+				.setStyle('SHORT')
+				.setRequired(true);
 
-
-      const message = new TextInputComponent()
-        .setCustomId('assistenzaMessage')
-        .setLabel("Descrivi qui i tuoi problemi brevemente")
-        .setPlaceholder('Bot Developed by DotBund for NightCity')
-        .setRequired(true);
-
-      const Nick = new TextInputComponent()
-        .setCustomId('assistenzaNick')
-        .setLabel('Nick')
-        .setPlaceholder("Inserisci qua il tuo nickname su miecraft")
-        .setStyle('SHORT')        
-        .setRequired(true);
-
-      const Link = new TextInputComponent()
-        .setCustomId('Link')
-        .setLabel('Clip')
-        .setPlaceholder('Inserisci qui le prove video');
-      const contentMessage = new MessageActionRow().addComponents(message);
-      const contentNick = new MessageActionRow().addComponents(Nick);
-      const contentButton = new MessageActionRow().addComponents(Link)
-      modal.addComponents(contentMessage , contentNick, contentButton );
+			const video = new TextInputComponent()
+				.setCustomId('assistenzaVideo')
+				.setLabel('Clip')
+				.setPlaceholder('Inserisci qui i link alle tue clip ( conosigliato caricarle su streamable )')
+				.setStyle('PARAGRAPH');
+			const contentMessage = new MessageActionRow().addComponents(message);
+			const contentNick = new MessageActionRow().addComponents(Nick);
+			const contentVideo = new MessageActionRow().addComponents(video)
+			modal.addComponents(contentNick, contentMessage, contentVideo);
 
 
 
-      
-        
-        }
-    if (interaction.commandName === 'say') {
+			await interaction.showModal(modal);
 
-      // Create the modal
-      const modal = new Modal()
-        .setCustomId('sayModal')
-        .setTitle('Say command by DotBund Development');
+		}
 
+			if (!interaction.isModalSubmit()) {
+				return;
+			} else {
 
-      const message = new TextInputComponent()
-        .setCustomId('sayMessage')
-        .setLabel("Scrivi qui il testo che vorrai inoltrare")
-        .setStyle('PARAGRAPH')
-        .setMinLength(config.sayMinLength)
-        .setPlaceholder('Bot Developed by Cescofran for DotBund')
-        .setRequired(true);
+				const messageRow = interaction.fields.getTextInputValue('assistenzaMessage');
+				const nickRow = interaction.fields.getTextInputValue('assistenzaNick');
+				const videoRow = interaction.fields.getTextInputValue('assistenzaVideo');
 
-      const link = new TextInputComponent()
-        .setCustomId('sayLink')
-        .setLabel('Link')
-        .setPlaceholder("Questo campo non è obbligatorio")
-        .setStyle('SHORT');
-
-      const buttonLink = new TextInputComponent()
-        .setCustomId('buttonLink')
-        .setLabel('Nome del bottone')
-        .setPlaceholder('Scrivi il nome del bottone ( vuoto equivale a "clip")')
-        .setStyle('SHORT');
-      const contentMessage = new MessageActionRow().addComponents(message);
-      const contentLink = new MessageActionRow().addComponents(link);
-      const contentButton = new MessageActionRow().addComponents(buttonLink)
-      modal.addComponents(contentMessage , contentLink, contentButton );
-
-
-
-      await interaction.showModal(modal);
-
- 
-    } 
-       if (!interaction.isModalSubmit()) {return;}
-       else{
-
-        if(interaction.customId === 'sayMessage'){
-          const messageRow = interaction.fields.getTextInputValue('sayMessage');
- 
-          const translated = await translate(messageRow, {to: 'en'});
-          var say = await new Discord.MessageEmbed()
-              .setColor(config.serverColorMain)
-              .setTitle(":flag_it: "+interaction.guild.name)
-              .setURL("https://discord.gg/a2kxdHvQNv")
-              .addField("**Message:**", "*"+messageRow+"*", true)  //true e fa rimanere sulla stessa linea le sezioni          
-              .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
-              .setFooter({text: `DotBund Services ©`,iconURL:"https://media.discordapp.net/attachments/962372390426394705/975441422842998834/bozza.png?width=670&height=670"})
-              .setTimestamp();
+				if (videoRow) {
+					var assEmbed = await new Discord.MessageEmbed()
+						.setColor(config.serverColorMain)
+						.setTitle(interaction.guild.name + " Assistence system")
+						.addField("**Nickname:**", "*``" + nickRow + "``*", true)
+						.addField("**Discord: **", interaction.user.toString(), true)
+						.addField("**Message:**", "*```" + messageRow + "```*", false) //true e fa rimanere sulla stessa linea le sezioni          
+						.addField("**Link Video:**", "*" + videoRow + "*", false)
+						.setThumbnail("https://media.discordapp.net/attachments/768387615908036628/988535192434118716/Martz90-Hex-Warning-1.png?width=230&height=230")
+						.setFooter({
+							text: `DotBund Services ©`,
+							iconURL: "https://media.discordapp.net/attachments/962372390426394705/975441422842998834/bozza.png?width=670&height=670"
+						})
+						.setTimestamp();
+				} else {
+					var assEmbed = await new Discord.MessageEmbed()
+						.setColor(config.serverColorMain)
+						.setTitle(interaction.guild.name + " Assistence system")
+						.addField("**Nickname:**", "*``" + nickRow + "``*", true)
+						.addField("**Discord: **", interaction.user.toString(), true)
+						.addField("**Message:**", "*```" + messageRow + "```*", false) //true e fa rimanere sulla stessa linea le sezioni          
+						.setThumbnail("https://media.discordapp.net/attachments/768387615908036628/988535192434118716/Martz90-Hex-Warning-1.png?width=230&height=230")
+						.setFooter({
+							text: `DotBund Services ©`,
+							iconURL: "https://media.discordapp.net/attachments/962372390426394705/975441422842998834/bozza.png?width=670&height=670"
+						})
+						.setTimestamp();
+				}
 
 
-              var saytranslated = await new Discord.MessageEmbed()
-                .setColor(config.serverColorMain)
-                .setTitle(":flag_us: "+interaction.guild.name)
-                .setURL("https://discord.gg/a2kxdHvQNv")
-
-                .addField("**Message:**", "*"+ translated.text +"*", true)  //true e fa rimanere sulla stessa linea le sezioni 
-                
-                .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
-                .setFooter({text: `DotBund Services ©`,iconURL:"https://media.discordapp.net/attachments/962372390426394705/975441422842998834/bozza.png?width=670&height=670"})
-                .setTimestamp();
-
-              const channel2 = await client.channels.cache.get(interaction.channelId);
+				client.channels.cache.get(config.assistenza).send({
+					content: "<@882256630211825736>",
+					embeds: [assEmbed]
+				})
+				return interaction.reply({
+					content: "Hai appena richiesto assistenza, non spammare. Entra in <#882256633076539465> e appena uno staff sarà disponibile ti aiuterà.",
+					ephemeral: true
+				})
 
 
-              const linkRow = await interaction.fields.getTextInputValue('sayLink');
-              const buttonRow = await interaction.fields.getTextInputValue('buttonLink')
-              if(linkRow){
-                if(buttonRow){
-                  var linkButton = new Discord.MessageActionRow()
-                  .addComponents(
-                      new Discord.MessageButton()
-                      .setLabel(buttonRow)
-                      .setStyle('LINK')
-                      .setURL(linkRow)
-                  );
-                }else{
-                  var linkButton = new Discord.MessageActionRow()
-                  .addComponents(
-                      new Discord.MessageButton()
-                      .setLabel('Clip')
-                      .setStyle('LINK')
-                      .setURL(linkRow)
-                  );
-              }
-                await channel2.send({
-                  content: "@everyone",
-                  embeds: [say, saytranslated],
-                  components: [linkButton]
-                }).catch(err => {return interaction.reply({content:"Non hai specificato un link corretto 😕", ephemeral:true})});
 
-              }else{
-                await channel2.send( {
-                    content:"@everyone",
-                    embeds:[say, saytranslated]
-                });
-                
-                
-                
-            } 
-            return interaction.reply( {content: "Fatto :grinning:", ephemeral: true}).catch(err => {});
 
-          
-        }else if(interaction.customId === 'assistenzaModal'){
-          
-        }
-          
-      }
- 
-  }
-}
+
+			}
+
+		}
+	}

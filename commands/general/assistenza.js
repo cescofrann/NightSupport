@@ -3,7 +3,7 @@ const {
   } = require('@discordjs/builders');
   
 module.exports = {
-  name: 'say',
+  name: 'assistenza',
   data: new SlashCommandBuilder()
     .setName('assistenza')
     .setDescription('Per richiedere assistenza fai questo comando'),
@@ -11,9 +11,8 @@ module.exports = {
 
   async execute(interaction) {
  
-  }
-  
 }
 
 
  
+}
