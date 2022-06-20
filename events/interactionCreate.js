@@ -102,78 +102,77 @@ module.exports = {
        if (!interaction.isModalSubmit()) {return;}
        else{
 
-        const messageRow = interaction.fields.getTextInputValue('sayMessage');
-
-
-
-
-
-
-        const translated = await translate(messageRow, {to: 'en'});
-        var say = await new Discord.MessageEmbed()
-            .setColor(config.serverColorMain)
-            .setTitle(":flag_it: "+interaction.guild.name)
-            .setURL("https://discord.gg/a2kxdHvQNv")
-            .addField("**Message:**", "*"+messageRow+"*", true)  //true e fa rimanere sulla stessa linea le sezioni          
-            .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
-            .setFooter({text: `DotBund Services ©`,iconURL:"https://media.discordapp.net/attachments/962372390426394705/975441422842998834/bozza.png?width=670&height=670"})
-            .setTimestamp();
-
-
-            var saytranslated = await new Discord.MessageEmbed()
+        if(interaction.customId === 'sayMessage'){
+          const messageRow = interaction.fields.getTextInputValue('sayMessage');
+ 
+          const translated = await translate(messageRow, {to: 'en'});
+          var say = await new Discord.MessageEmbed()
               .setColor(config.serverColorMain)
-              .setTitle(":flag_us: "+interaction.guild.name)
+              .setTitle(":flag_it: "+interaction.guild.name)
               .setURL("https://discord.gg/a2kxdHvQNv")
-
-              .addField("**Message:**", "*"+ translated.text +"*", true)  //true e fa rimanere sulla stessa linea le sezioni 
-              
+              .addField("**Message:**", "*"+messageRow+"*", true)  //true e fa rimanere sulla stessa linea le sezioni          
               .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
               .setFooter({text: `DotBund Services ©`,iconURL:"https://media.discordapp.net/attachments/962372390426394705/975441422842998834/bozza.png?width=670&height=670"})
               .setTimestamp();
 
-            const channel2 = await client.channels.cache.get(interaction.channelId);
+
+              var saytranslated = await new Discord.MessageEmbed()
+                .setColor(config.serverColorMain)
+                .setTitle(":flag_us: "+interaction.guild.name)
+                .setURL("https://discord.gg/a2kxdHvQNv")
+
+                .addField("**Message:**", "*"+ translated.text +"*", true)  //true e fa rimanere sulla stessa linea le sezioni 
+                
+                .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
+                .setFooter({text: `DotBund Services ©`,iconURL:"https://media.discordapp.net/attachments/962372390426394705/975441422842998834/bozza.png?width=670&height=670"})
+                .setTimestamp();
+
+              const channel2 = await client.channels.cache.get(interaction.channelId);
 
 
-            const linkRow = await interaction.fields.getTextInputValue('sayLink');
-            const buttonRow = await interaction.fields.getTextInputValue('buttonLink')
-            if(linkRow){
-              if(buttonRow){
-                var linkButton = new Discord.MessageActionRow()
-                .addComponents(
-                    new Discord.MessageButton()
-                    .setLabel(buttonRow)
-                    .setStyle('LINK')
-                    .setURL(linkRow)
-                );
+              const linkRow = await interaction.fields.getTextInputValue('sayLink');
+              const buttonRow = await interaction.fields.getTextInputValue('buttonLink')
+              if(linkRow){
+                if(buttonRow){
+                  var linkButton = new Discord.MessageActionRow()
+                  .addComponents(
+                      new Discord.MessageButton()
+                      .setLabel(buttonRow)
+                      .setStyle('LINK')
+                      .setURL(linkRow)
+                  );
+                }else{
+                  var linkButton = new Discord.MessageActionRow()
+                  .addComponents(
+                      new Discord.MessageButton()
+                      .setLabel('Clip')
+                      .setStyle('LINK')
+                      .setURL(linkRow)
+                  );
+              }
+                await channel2.send({
+                  content: "@everyone",
+                  embeds: [say, saytranslated],
+                  components: [linkButton]
+                }).catch(err => {return interaction.reply({content:"Non hai specificato un link corretto 😕", ephemeral:true})});
+
               }else{
-                var linkButton = new Discord.MessageActionRow()
-                .addComponents(
-                    new Discord.MessageButton()
-                    .setLabel('Clip')
-                    .setStyle('LINK')
-                    .setURL(linkRow)
-                );
-            }
-              await channel2.send({
-                content: "@everyone",
-                embeds: [say, saytranslated],
-                components: [linkButton]
-              }).catch(err => {return interaction.reply({content:"Non hai specificato un link corretto 😕", ephemeral:true})});
+                await channel2.send( {
+                    content:"@everyone",
+                    embeds:[say, saytranslated]
+                });
+                
+                
+                
+            } 
+            return interaction.reply( {content: "Fatto :grinning:", ephemeral: true}).catch(err => {});
 
-            }else{
-              await channel2.send( {
-                  content:"@everyone",
-                  embeds:[say, saytranslated]
-              });
-               
-              
-              
-          } 
-          return interaction.reply( {content: "Fatto :grinning:", ephemeral: true}).catch(err => {});
-
-        
+          
+        }else if(interaction.customId === 'assistenzaModal'){
           
         }
+          
+      }
  
   }
 }
